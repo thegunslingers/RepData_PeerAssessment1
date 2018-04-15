@@ -27,62 +27,27 @@ summary(sum$stepsD)
 
 ## What is the average daily activity pattern?
 ```{r, eval=TRUE}
-library(dplyr)
 mean <- data %>% group_by(interval) %>% filter(!is.na(steps)) %>% summarise(avg = mean(steps))
-# meants <- ts(mean, frequency = mean$interval)
-# plot.ts(x=meants[[1]], y=meants[[2]])
-# plot(meants)
 plot(mean$interval, mean$avg, type="l", xlab="interval", ylab="Avg. Steps" )
 abline(v=mean[order(mean$avg,decreasing = T)[1],1], col="green")
 text(mean[order(mean$avg,decreasing = T)[1],1], 20, labels=paste("Max", mean[order(mean$avg,decreasing = T)[1],1] , sep=" - "), col="red")
-
-#library(plotly)
-#plot_ly(x=mean$interval, y=mean$avg, mode = 'lines')
 
 ```
 
 
 ## Imputing missing values
 ```{r, eval=TRUE}
-library(dplyr)
 dataM <- data 
 na_count <-sapply(dataM, function(y) sum(length(which(is.na(y)))))
 na_count <- data.frame(na_count)
 na_count$observations <-NROW(dataM)
 data.frame(na_count)
 
-# meanfun <- function(data){
-#   for(row in data){
-#    if(is.na(row[1])){
-#      row[1] <-dataM %>% dplyr::filter(interval==row[2]) %>% dplyr::summarise(mean(steps))
-#    } 
-#   }
-#   #data %>% group_by(interval) %>% summarise(mean=mean(steps))
-# }
-meanfun(dataM)
-# naFIlled <- dataM %>% dplyr::group_by(interval) %>%  mutate_if(is.na, median, na.rm= TRUE)
-# naFIlled <- dataM %>% dplyr::group_by(interval) %>%  mutate_at(vars(steps), ~is.na(.), median(., na.rm= TRUE), .)
-# naFIlled <- dataM %>% dplyr::group_by(interval) %>%  mutate_all(~is.na(.), median(.,  na.rm= TRUE), .)
-# naFIlled <- dataM %>% dplyr::group_by(interval) %>%  mutate_all(~is.na(.), summarise(median(steps)), .)
-# naFIlled <- dataM %>% dplyr::group_by(interval) %>%  mutate_at(vars(steps), ~is.na(.), 0, .)
-# 
-# 
-# naFIlled <- dataM %>% dplyr::group_by(interval) %>%  mutate_at(vars(steps), ~is.na(.), meanfun(.), .)
-
 ## creating filling NAs in dataset
 for(i in 1:nrow(data)){
 
   if(is.na(data[i,1])){
-    
-    ##not piping i?
-    #dateV <- data[i,2]
-    #dataM[i,1] <- data, i %>% dplyr::filter(dataM[i,2]== date & !is.na(steps)) %>% dplyr::summarise(mean=mean(steps))
-    #dataM[i,1]<-data %>% dplyr::filter(data[,2]== date) %>% dplyr::summarise(mean=mean(steps,  na.rm= TRUE))
-   # dataM[i,1]<-data %>% dplyr::filter(dateV== date) %>% dplyr::summarise(mean=mean(steps,  na.rm= TRUE))
     dataM[i,1] <- data[data$interval == data[i,3],] %>% dplyr::summarise(mean=mean(steps,  na.rm= TRUE))
-    
-    
-    #dplyr::filter(data[i,2]==data[,2] & !is.na(data,1))
   } 
 
 }
@@ -96,12 +61,10 @@ text(median(dataM$steps), 10, labels="Median", col="green")
 ```
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r, eval=TRUE}
-#library("chron")
-#dataM$weekend = chron::is.weekend(dataM$date)
+library(lattice) 
 weekdays1 <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
 dataM$wDay <- factor((weekdays(dataM$date) %in% weekdays1), levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
 groupedDat <- dataM %>% group_by(interval, wDay) %>% summarise(stepsD = sum(steps))
-library(lattice) 
 xyplot(groupedDat$stepsD~groupedDat$interval|groupedDat$wDay, type="l")
 
 ```
