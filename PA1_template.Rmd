@@ -8,6 +8,8 @@ output:
 
 ## Loading and preprocessing the data
 ```{r, eval=TRUE}
+library(knitr)
+opts_chunk$set(fig.path = "./figures/")
 data <- read.csv("repdata_data_activity/activity.csv")
 data[[2]] <- as.Date(data[[2]])
 ```
